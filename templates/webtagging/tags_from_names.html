@@ -31,11 +31,11 @@ $(function(){
     var $refreshButton = $("#updateAllForm #refreshForm");
     var $submitButton = $("#updateAllForm input[type='submit']");
 
-
     // Refresh the entire auto-tagger with some potential options
     $("#updateAllForm").on("click", "#refreshForm", function(event){
 
         // Get options
+        var splitters = $('#splitters').val();
         var ignoreFirstFileToken = $('#ignoreFirstFileToken').prop('checked');
         var ignoreLastFileToken = $('#ignoreLastFileToken').prop('checked');
 
@@ -51,7 +51,7 @@ $(function(){
 
         var params = "";
         var first = true;
-        if (ignoreFirstFileToken || ignoreLastFileToken) {
+        if (ignoreFirstFileToken || ignoreLastFileToken || splitters) {
             params += "?";
             if (ignoreFirstFileToken) {
                 params += "ignoreFirstFileToken=True";
@@ -64,8 +64,14 @@ $(function(){
                 params += "ignoreLastFileToken=True";
                 first = false;
             }
+            if (splitters) {
+                if (!first) {
+                    params += "&";
+                }
+                params += "splitters=" + splitters;
+                first = false;
+            }
         }
-
         var auto_tag_url = '{% url webtagging_index %}auto_tag/dataset/'+oid+'/' + params;
 
         $("#auto_tag_panel").load(auto_tag_url);
@@ -468,6 +474,7 @@ $(function(){
         Extensions: <input id="hideExtTokensToggle" name="hideExtTokensToggle" value="hideExtTokensToggle" type="checkbox" />
         <input type="submit" value="Apply" />
         <input type="button" id="refreshForm" value="Refresh" />
+        <input type="text" id="splitters" value="{{ splitters }}" />
         Ignore First File Token: <input id="ignoreFirstFileToken" type="checkbox" {% if ignoreFirstFileToken %} checked{% endif %}/>
         Ignore Last File Token: <input id="ignoreLastFileToken" type="checkbox" {% if ignoreLastFileToken %} checked{% endif %}/>
     </div>

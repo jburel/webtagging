@@ -1,7 +1,8 @@
 import omero
 from omero.rtypes import rlong
+import re
 
-def parse_path(path):
+def parse_path(path, splitters):
     """ 
     TODO: Should take arguments relating to regex
     Splits the path up according to regex and returns lists of tokens
@@ -17,7 +18,9 @@ def parse_path(path):
     file = ext_tokens.pop(0)
 
     #TODO Cope with multiple separators
-    file_tokens = file.split(r'_')
+    #file_tokens = file.split(r'_')
+    r = "[" + splitters + "]+"
+    file_tokens = re.split(r, file)
 
     return path_tokens, file_tokens, ext_tokens
 

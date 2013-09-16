@@ -36,10 +36,11 @@ def auto_tag(request, datasetId=None, conn=None, **kwargs):
         images = list( dataset.listChildren() )
         images.sort(key=lambda img: img.getName().lower())
 
+    splitters = str(request.GET.get('splitters', '_'))
     ignoreFirstFileToken = bool(request.GET.get('ignoreFirstFileToken', False))
     ignoreLastFileToken = bool(request.GET.get('ignoreLastFileToken', False))
 
-    tokenTags, imageDetails, imageStates = build_table_data(conn, images, ignoreFirstFileToken=ignoreFirstFileToken, ignoreLastFileToken=ignoreLastFileToken)
+    tokenTags, imageDetails, imageStates = build_table_data(conn, images, splitters, ignoreFirstFileToken=ignoreFirstFileToken, ignoreLastFileToken=ignoreLastFileToken)
     # We only need to return a dict - the @render_response() decorator does the rest...
     context = {'template': 'webtagging/tags_from_names.html'}
     context['tokenTags'] = tokenTags
@@ -47,10 +48,11 @@ def auto_tag(request, datasetId=None, conn=None, **kwargs):
     context['imageStates'] = json.dumps(imageStates)
     context['ignoreFirstFileToken'] = ignoreFirstFileToken
     context['ignoreLastFileToken'] = ignoreLastFileToken
+    context['splitters'] = splitters
     return context
 
 
-def build_table_data(conn, images, ignoreFirstFileToken=False, ignoreLastFileToken=False):
+def build_table_data(conn, images, splitters, ignoreFirstFileToken=False, ignoreLastFileToken=False):
     """
     We need to build tagging table data when the page originally loads 
     """
@@ -72,7 +74,7 @@ def build_table_data(conn, images, ignoreFirstFileToken=False, ignoreLastFileTok
     for image in images:
         name = image.getName()
  
-        pt, ft, et = parse_path(name)
+        pt, ft, et = parse_path(name, splitters)
         
         # Do discards
         #TODO Incredibly primitive, replace with much, much smarter discarding system
